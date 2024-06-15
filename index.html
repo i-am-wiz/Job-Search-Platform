@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Listings</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="filters">
+            <h2>Filters</h2>
+            <form id="filterForm">
+                <label for="roles">Roles</label>
+                <select id="roles" name="roles">
+                    <option value="upto3">Upto 3</option>
+                </select>
+
+                <label for="jobType">Job type</label>
+                <select id="jobType" name="jobType">
+                    <option value="fullTime">Full-Time</option>
+                </select>
+
+                <label for="skills">Skills</label>
+                <select id="skills" name="skills">
+                    <option value="upto5">Upto 5</option>
+                </select>
+
+                <label for="experience">Experience</label>
+                <input type="number" id="experienceMin" name="experienceMin" placeholder="min">
+                <input type="number" id="experienceMax" name="experienceMax" placeholder="max">
+
+                <label for="country">Country</label>
+                <input type="text" id="country" name="country">
+
+                <label for="city">City</label>
+                <input type="text" id="city" name="city">
+
+
+                <label for="resume">Upload Resume</label>
+                <input type="file" id="resume" name="resume" accept=".pdf">
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div class="job-listings" id="jobListings">
+            <!-- Job listings will be populated here -->
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

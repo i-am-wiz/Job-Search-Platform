@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f4f8;
+}
+
+.container {
+    display: flex;
+    padding: 20px;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.filters {
+    width: 300px;
+    padding: 20px;
+    background-color: #fffbeb;
+    border: 2px solid #fcd34d;
+    margin-right: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    animation: slideInFromLeft 0.5s ease-in-out;
+}
+
+.filters h2 {
+    margin-top: 0;
+    font-weight: 500;
+    color: #d97706;
+}
+
+.filters label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #9a3412;
+}
+
+.filters select, 
+.filters input[type="text"], 
+.filters input[type="number"], 
+.filters input[type="file"], 
+.filters button {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.filters input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.filters button {
+    background-color: #fbbf24;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.filters button:hover {
+    background-color: #f59e0b;
+}
+
+.job-listings {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: #fff;
+    border: 2px solid #60a5fa;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    animation: slideInFromRight 0.5s ease-in-out;
+}
+
+.job-listing {
+    padding: 20px;
+    border-bottom: 1px solid #ddd;
+    transition: transform 0.3s ease;
+    background-color: #e0f2fe;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.job-listing:hover {
+    transform: translateX(10px);
+    background-color: #bae6fd;
+}
+
+.job-listing:last-child {
+    border-bottom: none;
+}
+
+.job-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #1d4ed8;
+}
+
+.job-details {
+    margin-top: 10px;
+    color: #1e3a8a;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInFromLeft {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes slideInFromRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
