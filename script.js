@@ -1,56 +1,65 @@
-document.getElementById('filterForm').addEventListener('submit', function(e) {
-    e.preventDefault();
 
-    const jobs = [
-        {
-            title: "Software Engineer Intern (Fall 24) at Dolby Laboratories",
-            location: "Remote (United States)",
-            type: "Internship (3 months)",
-            pay: "$45/hour",
-            skills: ["C++", "Python", "CMake", "Conan"]
-        },
-        {
-            title: "Software Engineer (Backend) at Ambient.ai",
-            location: "In-Office (Bengaluru, India)",
-            type: "Full-time",
-            experience: "5+ years",
-            skills: ["Python", "C++", "GoLang", "REST APIs"]
-        },
-        {
-            title: "Software Engineer - Ecosystem Integrations at Ambient.ai",
-            location: "In-Office (Montreal, Canada)",
-            type: "Full-time",
-            experience: "3+ years",
-            skills: ["Python", "C++", "HTTP Requests"]
-        },
-        {
-            title: "Android Developer, Authentication Experience at 1Password",
-            location: "Remote (United States +1)",
-            type: "Full-time",
-            salary: "$121k - $163k",
-            experience: "4+ years",
-            skills: ["Android", "Kotlin", "Jetpack Compose", "Swift"]
-        }
-    ];
+        // Select elements
+        const fileInput = document.getElementById('resume');
+        const previewButton = document.getElementById('previewButton');
+        const pdfPreviewModal = document.getElementById('pdfPreviewModal');
+        const pdfPreview = document.getElementById('pdfPreview');
+        const closePreview = document.getElementById('closePreview');
 
-    const jobListings = document.getElementById('jobListings');
-    jobListings.innerHTML = '';
+        // Add event listener to the Preview button
+        previewButton.addEventListener('click', function() {
+            const file = fileInput.files[0];
+            if (!file || !file.type.includes('application/pdf')) {
+                alert('Please upload a PDF file.');
+                return;
+            }
 
-    jobs.forEach(job => {
-        const jobElement = document.createElement('div');
-        jobElement.classList.add('job-listing');
+            const fileReader = new FileReader();
+            fileReader.onload = function() {
+                const typedarray = new Uint8Array(this.result);
+                // Load the PDF document
+                pdfjsLib.getDocument({ data: typedarray }).promise.then(function(pdf) {
+                    // Fetch the first page
+                    pdf.getPage(1).then(function(page) {
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        const viewport = page.getViewport({ scale: 1.5 });
 
-        const jobTitle = document.createElement('div');
-        jobTitle.classList.add('job-title');
-        jobTitle.textContent = job.title;
+                        // Set canvas dimensions
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
 
-        const jobDetails = document.createElement('div');
-        jobDetails.classList.add('job-details');
-        jobDetails.textContent = `${job.location} • ${job.type} • ${job.experience || ''} • ${job.salary || job.pay} • Skills: ${job.skills.join(', ')}`;
+                        // Render PDF page into canvas context
+                        const renderContext = {
+                            canvasContext: context,
+                            viewport: viewport
+                        };
+                        page.render(renderContext).promise.then(function() {
+                            // Set iframe src to data URL of rendered PDF
+                            pdfPreview.src = canvas.toDataURL();
+                            // Show the PDF preview modal
+                            pdfPreviewModal.style.display = 'block';
+                        });
+                    });
+                }).catch(function(err) {
+                    console.error('Error loading PDF:', err);
+                    alert('Error loading PDF. Please try again.');
+                });
+            };
 
-        jobElement.appendChild(jobTitle);
-        jobElement.appendChild(jobDetails);
+            // Read the uploaded file as array buffer
+            fileReader.readAsArrayBuffer(file);
+        });
 
-        jobListings.appendChild(jobElement);
-    });
-});
+        // Close PDF preview modal when close button is clicked
+        closePreview.addEventListener('click', function() {
+            pdfPreviewModal.style.display = 'none';
+        });
+
+        // Close PDF preview modal when clicking outside of the modal content
+        window.addEventListener('click', function(event) {
+            if (event.target === pdfPreviewModal) {
+                pdfPreviewModal.style.display = 'none';
+            }
+        });
+    
