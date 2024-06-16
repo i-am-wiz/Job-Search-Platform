@@ -1,4 +1,5 @@
 
+
         // Select elements
         const fileInput = document.getElementById('resume');
         const previewButton = document.getElementById('previewButton');
@@ -62,4 +63,4 @@
                 pdfPreviewModal.style.display = 'none';
             }
         });
-    
+
