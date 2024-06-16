@@ -1,4 +1,4 @@
-import { run, parseTextContentAndTokenize } from "./module.mjs";
+import { run, parseTextContentAndTokenize, model } from "./module.mjs";
 const fileInput = document.getElementById("resume");
 const pdfPreviewModal = document.getElementById("pdfPreviewModal");
 const pdfPreview = document.getElementById("pdfPreview");
@@ -121,6 +121,7 @@ function parsePdf() {
                 console.log(selectedRole);
                 console.log(location);
                 console.log(pdfTextContent);
+
                 if (!selectedRole || !pdfTextContent) {
                     console.log("Inside if nahi jaana chahiye tha");
                     return;
@@ -141,6 +142,44 @@ function parsePdf() {
 
 extractButton.addEventListener("click", findJobs);
 
+async function fetchData(jobText) {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    const raw = JSON.stringify({
+        jobText,
+    });
+
+    const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow",
+    };
+
+    try {
+        const response = await fetch(
+            "https://api.apify.com/v2/acts/dogged_jellyfish~hackathon/run-sync?token=apify_api_spcI2RuMGON8nbxcygKAyA60qkgbdR0Rj3Zn",
+            requestOptions
+        );
+        const result = await response.text();
+        console.log(result);
+        console.log(typeof result);
+        return JSON.parse(result);
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+function simulateAsyncOperation() {
+    return new Promise(function (resolve, reject) {
+        setTimeout(function () {
+            resolve("Response received!");
+            // or reject('An error occurred!');
+        }, 20000); // Simulating a 2 second delay
+    });
+}
+
 async function findJobs() {
     const file = fileInput.files[0];
     if (!file || !file.type.includes("application/pdf")) {
@@ -148,20 +187,40 @@ async function findJobs() {
         return;
     }
 
-    let responseFromAnuj = {
-        jobs: [
-            { jobTitle: "Backend", links: [], description: "" },
-            { jobTitle: "Frontend", links: [], description: "" },
-        ],
-    };
+    var loader = document.getElementById("loader");
+    loader.style.display = "block";
 
-    let jobOpportunities = responseFromAnuj.jobs;
+    // Simulate an asynchronous operation (e.g., fetch request)
+    simulateAsyncOperation()
+        .then(function (response) {
+            console.log(response);
+            loader.style.display = "none";
+        })
+        .catch(function (error) {
+            console.error(error);
+            loader.style.display = "none";
+        });
+
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    const form = document.getElementById("filterForm");
+    const selectedRole = form.elements["roles"].value;
+    const experience = form.elements["years"].value;
+    const location = form.elements["location"].value;
+    let jobText = `${selectedRole} jobs for ${experience} years experience in ${location} `;
+
+    const raw = JSON.stringify({
+        jobText: jobText,
+    });
+
+    let jobOpportunities = await fetchData(jobText);
 
     jobOpportunities = jobOpportunities.map((jobOpportunity, index) => {
         jobOpportunity.jobId = index;
         return jobOpportunity;
     });
-
+    console.log(typeof jobOpportunities);
     console.log(jobOpportunities);
 
     let prompt = `You are given a candidate's profile and an array of job opportunities. Based on the candidate's profile, you have to shortlist a maximum of 10 jobs among the available. Select only the jobs that are highly aligned with the candidate's profile. If there are 34 jobs provided in the input and there are only 5 strongly matching jobs, then provide only 5. You don't have to necessarily list 10 jobs. 10 is just the maximum limit which indicates that the number of matching jobs in your response should never exceed 10. If there are 15 matching jobs, then narrow down the resulting set and list the best 10 jobs instead of 15. 
@@ -174,7 +233,7 @@ async function findJobs() {
 
 
     Candidate's profile: ${geminiResponseForPdfParseInput}
-    Job Opportunities: ${jobOpportunities}
+    Job Opportunities: ${JSON.stringify(jobOpportunities, null, 2)}
 
     Response format:
     Each job has a jobId. You have to return an array of jobIds which correspond to the matching jobs shortlisted by you. Return only the array, no english words, no formatting characters, nothing except from an array. Ids should be in ascending sorted order.
@@ -186,10 +245,14 @@ async function findJobs() {
 
     `;
 
+    console.log(geminiResponseForPdfParseInput);
+    console.log(prompt);
+
     //const response = await
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const matchingJobs = response.text();
+    let matchingJobs = response.text();
+    matchingJobs = JSON.parse(matchingJobs);
     console.log(matchingJobs);
 
     let resultingJobs = [];
@@ -200,32 +263,41 @@ async function findJobs() {
         i < jobOpportunities.length && ind < matchingJobs.length;
         ++i
     ) {
-        jobOpportunity = jobOpportunities[i];
+        let jobOpportunity = jobOpportunities[i];
+        console.log(jobOpportunity);
+        console.log(matchingJobs[ind]);
         if (jobOpportunity.jobId == matchingJobs[ind]) {
+            console.log("Inside if");
             resultingJobs.push(jobOpportunity);
             ++ind;
         }
     }
 
+    console.log(resultingJobs);
+
     const jobListings = document.getElementById("jobListings");
     jobListings.innerHTML = "";
 
     resultingJobs.forEach((job) => {
+        console.log(job);
         const jobElement = document.createElement("div");
         jobElement.classList.add("job-listing");
 
         const jobTitle = document.createElement("div");
         jobTitle.classList.add("job-title");
-        jobTitle.textContent = job.title;
+        jobTitle.innerText = job.jobTitle;
+        console.log(job.jobTitle);
 
-        const jobDetails = document.createElement("div");
-        jobDetails.classList.add("job-details");
-        jobDetails.textContent = `${job.location} • ${job.type} • ${
-            job.experience || ""
-        } • ${job.salary || job.pay} • Skills: ${job.skills.join(", ")}`;
+        const applyLink = document.createElement("a");
+        applyLink.classList.add("link-class");
+        applyLink.innerText = "Apply here";
+        applyLink.href = job.link;
+        applyLink.target = "blank";
+        applyLink.style.display = "block";
+        applyLink.style.marginLeft = "auto";
 
         jobElement.appendChild(jobTitle);
-        jobElement.appendChild(jobDetails);
+        jobElement.appendChild(applyLink);
 
         jobListings.appendChild(jobElement);
     });
