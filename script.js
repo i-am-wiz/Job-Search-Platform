@@ -1,56 +1,80 @@
-document.getElementById('filterForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+const fileInput = document.getElementById('resume');
+const previewButton = document.getElementById('previewButton');
+const extractButton = document.getElementById('extractButton');
+const pdfPreviewModal = document.getElementById('pdfPreviewModal');
+const pdfPreviewContainer = document.getElementById('pdfPreviewContainer');
+const closePreview = document.getElementById('closePreview');
 
-    const jobs = [
-        {
-            title: "Software Engineer Intern (Fall 24) at Dolby Laboratories",
-            location: "Remote (United States)",
-            type: "Internship (3 months)",
-            pay: "$45/hour",
-            skills: ["C++", "Python", "CMake", "Conan"]
-        },
-        {
-            title: "Software Engineer (Backend) at Ambient.ai",
-            location: "In-Office (Bengaluru, India)",
-            type: "Full-time",
-            experience: "5+ years",
-            skills: ["Python", "C++", "GoLang", "REST APIs"]
-        },
-        {
-            title: "Software Engineer - Ecosystem Integrations at Ambient.ai",
-            location: "In-Office (Montreal, Canada)",
-            type: "Full-time",
-            experience: "3+ years",
-            skills: ["Python", "C++", "HTTP Requests"]
-        },
-        {
-            title: "Android Developer, Authentication Experience at 1Password",
-            location: "Remote (United States +1)",
-            type: "Full-time",
-            salary: "$121k - $163k",
-            experience: "4+ years",
-            skills: ["Android", "Kotlin", "Jetpack Compose", "Swift"]
-        }
-    ];
+previewButton.addEventListener('click', function () {
+    const file = fileInput.files[0];
+    if (!file || !file.type.includes('application/pdf')) {
+        alert('Please upload a PDF file.');
+        return;
+    }
 
-    const jobListings = document.getElementById('jobListings');
-    jobListings.innerHTML = '';
+    const fileReader = new FileReader();
+    fileReader.onload = function () {
+        const typedarray = new Uint8Array(this.result);
+        pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
+            pdfPreviewContainer.innerHTML = ''; // Clear previous content
+            const numPages = pdf.numPages;
+            const promises = [];
+            for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                promises.push(pdf.getPage(pageNum).then(function (page) {
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
 
-    jobs.forEach(job => {
-        const jobElement = document.createElement('div');
-        jobElement.classList.add('job-listing');
+                    return page.render({ canvasContext: context, viewport: viewport }).promise.then(function () {
+                        const div = document.createElement('div');
+                        div.className = 'pdf-page';
+                        div.appendChild(canvas);
+                        pdfPreviewContainer.appendChild(div);
+                    });
+                }));
+            }
+            Promise.all(promises).then(function () {
+                pdfPreviewModal.style.display = 'flex';
+            });
+        });
+    };
+    fileReader.readAsArrayBuffer(file);
+});
 
-        const jobTitle = document.createElement('div');
-        jobTitle.classList.add('job-title');
-        jobTitle.textContent = job.title;
+closePreview.addEventListener('click', function () {
+    pdfPreviewModal.style.display = 'none';
+    pdfPreviewContainer.innerHTML = ''; // Clear the content
+});
 
-        const jobDetails = document.createElement('div');
-        jobDetails.classList.add('job-details');
-        jobDetails.textContent = `${job.location} • ${job.type} • ${job.experience || ''} • ${job.salary || job.pay} • Skills: ${job.skills.join(', ')}`;
+extractButton.addEventListener('click', function () {
+    const file = fileInput.files[0];
+    if (!file || !file.type.includes('application/pdf')) {
+        alert('Please upload a PDF file.');
+        return;
+    }
 
-        jobElement.appendChild(jobTitle);
-        jobElement.appendChild(jobDetails);
-
-        jobListings.appendChild(jobElement);
-    });
+    const fileReader = new FileReader();
+    fileReader.onload = function () {
+        const typedarray = new Uint8Array(this.result);
+        pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
+            let textContent = '';
+            const numPages = pdf.numPages;
+            const promises = [];
+            for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                promises.push(pdf.getPage(pageNum).then(function (page) {
+                    return page.getTextContent().then(function (text) {
+                        text.items.forEach(function (item) {
+                            textContent += item.str + ' ';
+                        });
+                    });
+                }));
+            }
+            Promise.all(promises).then(function () {
+                console.log(textContent);
+            });
+        });
+    };
+    fileReader.readAsArrayBuffer(file);
 });
