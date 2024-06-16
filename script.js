@@ -1,4 +1,3 @@
-// Select elements
 import { run, parseTextContentAndTokenize } from "./module.mjs";
 const fileInput = document.getElementById("resume");
 const pdfPreviewModal = document.getElementById("pdfPreviewModal");
