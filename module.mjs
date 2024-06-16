@@ -10,7 +10,7 @@ export const model = genAI.getGenerativeModel({
     model: "gemini-1.5-flash",
 });
 
-console.log("Success");
+//console.log("Success");
 
 export async function run() {
     const prompt = "Road to 100 Crore";
@@ -18,11 +18,11 @@ export async function run() {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-    console.log(text);
+    //console.log(text);
 }
 
 export async function parseTextContentAndTokenize(jobRole, textContent) {
-    console.log(jobRole);
+    //console.log(jobRole);
     let prompt = `You are given data extracted from a resume applied for a given job role by a candidate. You will be provided two inputs, one is job role and other is data extracted from pdf. You have to gather insights from the data and group similar insights together and summarise it. 
     
     Example of a grouping expected from you:

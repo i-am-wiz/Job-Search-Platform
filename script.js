@@ -101,7 +101,7 @@ function parsePdf() {
                 );
             }
             Promise.all(promises).then(async function () {
-                console.log(textContent);
+                //console.log(textContent);
                 pdfTextContent = textContent;
                 //window.pdfTextContent = pdfTextContent;
                 console.log("Find jobs triggered");
@@ -116,14 +116,14 @@ function parsePdf() {
                 const location = form.elements["location"].value;
                 // const city = form.elements["city"].value;
                 // const resumeFile = form.elements["resume"].files[0];
-                console.log(skills);
-                console.log(experience);
-                console.log(selectedRole);
-                console.log(location);
-                console.log(pdfTextContent);
+                // console.log(skills);
+                // console.log(experience);
+                // console.log(selectedRole);
+                // console.log(location);
+                // console.log(pdfTextContent);
 
                 if (!selectedRole || !pdfTextContent) {
-                    console.log("Inside if nahi jaana chahiye tha");
+                    //console.log("Inside if nahi jaana chahiye tha");
                     return;
                 }
                 geminiResponseForPdfParseInput =
@@ -133,7 +133,7 @@ function parsePdf() {
                     );
                 window.geminiResponseForPdfParseInput =
                     geminiResponseForPdfParseInput;
-                console.log(geminiResponseForPdfParseInput);
+                //console.log(geminiResponseForPdfParseInput);
             });
         });
     };
@@ -163,11 +163,11 @@ async function fetchData(jobText) {
             requestOptions
         );
         const result = await response.text();
-        console.log(result);
-        console.log(typeof result);
+        //console.log(result);
+        //console.log(typeof result);
         return JSON.parse(result);
     } catch (error) {
-        console.error("Error:", error);
+        //console.error("Error:", error);
     }
 }
 
@@ -193,11 +193,11 @@ async function findJobs() {
     // Simulate an asynchronous operation (e.g., fetch request)
     simulateAsyncOperation()
         .then(function (response) {
-            console.log(response);
+            //console.log(response);
             loader.style.display = "none";
         })
         .catch(function (error) {
-            console.error(error);
+            //console.error(error);
             loader.style.display = "none";
         });
 
@@ -220,8 +220,8 @@ async function findJobs() {
         jobOpportunity.jobId = index;
         return jobOpportunity;
     });
-    console.log(typeof jobOpportunities);
-    console.log(jobOpportunities);
+    //console.log(typeof jobOpportunities);
+    //console.log(jobOpportunities);
 
     let prompt = `You are given a candidate's profile and an array of job opportunities. Based on the candidate's profile, you have to shortlist a maximum of 10 jobs among the available. Select only the jobs that are highly aligned with the candidate's profile. If there are 34 jobs provided in the input and there are only 5 strongly matching jobs, then provide only 5. You don't have to necessarily list 10 jobs. 10 is just the maximum limit which indicates that the number of matching jobs in your response should never exceed 10. If there are 15 matching jobs, then narrow down the resulting set and list the best 10 jobs instead of 15. 
     
@@ -245,15 +245,15 @@ async function findJobs() {
 
     `;
 
-    console.log(geminiResponseForPdfParseInput);
-    console.log(prompt);
+    // console.log(geminiResponseForPdfParseInput);
+    // console.log(prompt);
 
     //const response = await
     const result = await model.generateContent(prompt);
     const response = await result.response;
     let matchingJobs = response.text();
     matchingJobs = JSON.parse(matchingJobs);
-    console.log(matchingJobs);
+    //console.log(matchingJobs);
 
     let resultingJobs = [];
     let id = 0,
@@ -264,29 +264,29 @@ async function findJobs() {
         ++i
     ) {
         let jobOpportunity = jobOpportunities[i];
-        console.log(jobOpportunity);
-        console.log(matchingJobs[ind]);
+        // console.log(jobOpportunity);
+        // console.log(matchingJobs[ind]);
         if (jobOpportunity.jobId == matchingJobs[ind]) {
-            console.log("Inside if");
+            //console.log("Inside if");
             resultingJobs.push(jobOpportunity);
             ++ind;
         }
     }
 
-    console.log(resultingJobs);
+    //console.log(resultingJobs);
 
     const jobListings = document.getElementById("jobListings");
     jobListings.innerHTML = "";
 
     resultingJobs.forEach((job) => {
-        console.log(job);
+        //console.log(job);
         const jobElement = document.createElement("div");
         jobElement.classList.add("job-listing");
 
         const jobTitle = document.createElement("div");
         jobTitle.classList.add("job-title");
         jobTitle.innerText = job.jobTitle;
-        console.log(job.jobTitle);
+        //console.log(job.jobTitle);
 
         const applyLink = document.createElement("a");
         applyLink.classList.add("link-class");
